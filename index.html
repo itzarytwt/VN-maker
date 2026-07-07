@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Visual Novel Studio</title>
+    <!-- Tailwind CSS Engine -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Pixi.js Graphics Core Engine -->
+    <script src="https://cloudflare.com"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col items-center p-6 selection:bg-blue-500/30">
+    <header class="w-full max-w-6xl flex justify-between items-center mb-6">
+        <div class="flex items-center space-x-3">
+            <h1 class="text-3xl font-extrabold text-blue-400 tracking-tight">Base VN Architect 🎮</h1>
+            <span class="bg-blue-500/20 text-blue-400 text-xs px-2.5 py-1 rounded-full border border-blue-500/30 font-semibold">Standalone Edition</span>
+        </div>
+        <div class="flex space-x-2">
+            <button id="exportProjectBtn" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2 px-4 rounded-lg text-sm transition border border-slate-700 cursor-pointer">💾 Export Full Game Pack</button>
+            <label class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2 px-4 rounded-lg text-sm transition border border-slate-700 cursor-pointer">
+                📂 Load Game Pack
+                <input type="file" id="importProjectInput" accept=".json" class="hidden">
+            </label>
+            <button id="connectWallet" class="bg-blue-600 hover:bg-blue-500 font-bold py-2 px-5 rounded-lg text-sm transition shadow-md shadow-blue-900/30 cursor-pointer">Connect Wallet</button>
+        </div>
+    </header>
+
+    <div class="w-full max-w-6xl grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <main class="lg:col-span-2 space-y-6">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-2xl relative">
+                <div id="gameCanvasContainer" class="w-full bg-black aspect-video relative flex justify-center items-center"></div>
+                <div class="absolute top-4 left-4 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-md text-xs font-semibold tracking-wider text-emerald-400 border border-emerald-500/20 flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>STACKBLITZ SIMULATOR V2</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-6 shadow-2xl space-y-4">
+                <div class="flex justify-between items-center border-b border-slate-700 pb-2">
+                    <h2 class="text-lg font-bold text-slate-200">Scene Sequence Matrix</h2>
+                    <span class="text-xs text-slate-400" id="sceneCounter">Total Scenes In Memory: 0</span>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="md:col-span-2">
+                        <label class="text-xs font-bold text-slate-400 block mb-1">SCENE TEXT DIALOGUE MATRICES</label>
+                        <textarea id="dialogueInput" class="w-full h-24 bg-slate-950 border border-slate-700 rounded-lg p-3 text-sm focus:outline-none focus:border-blue-500 text-white" placeholder="Type what characters say here..."></textarea>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-400 block mb-1">BEHAVIOR & TEXT AUDIO EFFECTS</label>
+                        <select id="typingSoundSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-300">
+                            <option value="none">🔇 Silent Scrolling</option>
+                            <option value="click">⌨️ Mechanical Clicks</option>
+                            <option value="gibberish">🔊 Retro Dialogue Beeps</option>
+                        </select>
+                        <select id="spriteEffectSelect" class="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs text-slate-300">
+                            <option value="none">🧍 Normal Stance</option>
+                            <option value="shake">🫨 Micro Shake Loop</option>
+                            <option value="bounce">🦘 Persistent Bounce Effect</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-400 block">FORKED STORY BRANCH CHOICES (Optional)</label>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="text" id="choice1Input" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs focus:outline-none focus:border-blue-500 text-white" placeholder="Choice option #1 text line...">
+                        <input type="text" id="choice2Input" class="bg-slate-950 border border-slate-700 rounded-lg p-2 text-xs focus:outline-none focus:border-blue-500 text-white" placeholder="Choice option #2 text line...">
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-2 pt-2">
+                    <button id="playCurrentSceneBtn" class="bg-emerald-600 hover:bg-emerald-500 font-bold py-2.5 px-5 rounded-lg text-xs transition cursor-pointer">▶️ Run Engine Sequence</button>
+                    <button id="commitSceneBtn" class="bg-blue-600 hover:bg-blue-500 font-bold py-2.5 px-4 rounded-lg text-xs transition cursor-pointer">➕ Commit Scene Node to Stack</button>
+                    <button id="clearWorkspaceBtn" class="bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/40 font-bold py-2.5 px-4 rounded-lg text-xs transition cursor-pointer">🧹 Reset Memory Engine</button>
+                </div>
+            </div>
+        </main>
+
+        <aside class="space-y-6">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow-2xl space-y-4">
+                <h3 class="text-base font-bold text-slate-200 border-b border-slate-700 pb-2">📂 Project Asset Repositories</h3>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 block mb-1">BACKGROUND ENVIRONMENTAL FILES (.png / .jpg)</label>
+                    <input type="file" id="bgInput" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-slate-700 file:text-slate-300 cursor-pointer">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 block mb-1">CHARACTER TRANSPARENT SPRITES (.png)</label>
+                    <input type="file" id="characterInput" accept="image/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-slate-700 file:text-slate-300 cursor-pointer">
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 block mb-1">AMBIENT SOUNDS / LOOPING TRACKS (.mp3)</label>
+                    <input type="file" id="bgmInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-slate-700 file:text-slate-300 cursor-pointer mb-2">
+                    <div class="flex space-x-2">
+                        <button id="playBgm" class="bg-slate-950 hover:bg-black text-[11px] px-3 py-1 rounded text-emerald-400 border border-slate-700 font-semibold cursor-pointer">Play Loop</button>
+                        <button id="stopBgm" class="bg-slate-950 hover:bg-black text-[11px] px-3 py-1 rounded text-rose-400 border border-slate-700 font-semibold cursor-pointer">Kill Loop</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="text-xs font-bold text-slate-400 block mb-1">NARRATIVE VOICE TRACK OVERRIDES (.mp3)</label>
+                    <input type="file" id="voInput" accept="audio/*" class="block w-full text-xs text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-slate-700 file:text-slate-300 cursor-pointer">
+                </div>
+            </div>
+            <div class="bg-slate-800 rounded-xl border border-slate-700 p-5 shadow-2xl space-y-3">
+                <h3 class="text-base font-bold text-slate-200 border-b border-slate-700 pb-2">⛓️ Decentralized Base Operations</h3>
+                <p class="text-xs text-slate-400 leading-relaxed">Publish narrative hashes directly to the Base blockchain layer. This registers proof-of-creation and allows player save tokens to verify story choices dynamically.</p>
+                <button id="saveOnChain" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-2.5 px-4 rounded-lg transition text-xs shadow-lg shadow-indigo-950/50 cursor-pointer"> Immutable Branch Sync </button>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ENGINE RUNTIME INTERPRETER SCRIPT -->
+    <script>
+        // Init PixiJS Engine Canvas inside Container
+        const containerElement = document.getElementById('gameCanvasContainer');
+        const app = new PIXI.Application({
+            width: 800,
+            height: 450,
+            backgroundColor: 0x0f172a,
+            resolution: window.devicePixelRatio || 1,
+            autoDensity: true
+        });
+        containerElement.appendChild(app.view);
+
+        // Adjust Canvas to fit wrapper fluidly
+        app.view.style.width = "100%";
+        app.view.style.height = "100%";
+
+        // Display Layer Structures
+        const bgLayer = new PIXI.Container();
+        const characterLayer = new PIXI.Container();
+        const uiLayer = new PIXI.Container();
+        const decisionsContainer = new PIXI.Container();
